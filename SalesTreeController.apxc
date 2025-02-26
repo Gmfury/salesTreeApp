@@ -1,0 +1,63 @@
+public with sharing class SalesTreeController {
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getGroupedTrans(Id storeLocationId) {
+        System.debug('storeLocationId: ' + storeLocationId);
+        
+        List<Transaction__c> trans = [
+            SELECT Id, Type__c, Sales_Rep__r.Name, Shoe__r.Name, Sale_Price__c, CreatedDate, LastModifiedDate
+            FROM Transaction__c
+            WHERE Store_Location__r.Id = :storeLocationId
+            LIMIT 100
+        ];
+
+        System.debug('Fetched transactions: ' + trans);
+
+        Map<String, List<Transaction__c>> transgroup = new Map<String, List<Transaction__c>>();
+
+        for (Transaction__c t : trans) {
+            if (!transgroup.containsKey(t.Type__c)) {
+                transgroup.put(t.Type__c, new List<Transaction__c>());
+            }
+            transgroup.get(t.Type__c).add(t);
+        }
+
+        List<Map<String, Object>> result = new List<Map<String, Object>>();
+
+        for (String type : transgroup.keySet()) {
+            Map<String, Object> transgroupMap = new Map<String, Object>();
+            transgroupMap.put('Id', type);
+            transgroupMap.put('Name', type);
+
+            List<Map<String, Object>> childrenList = new List<Map<String, Object>>();
+            Decimal totalSalePrice = 0;
+
+            for (Transaction__c t : transgroup.get(type)) {
+                Map<String, Object> childMap = new Map<String, Object>();
+                childMap.put('Id', t.Id);
+                childMap.put('Sales_Rep__c', t.Sales_Rep__r.Name);
+                childMap.put('Shoe__c', t.Shoe__r.Name);
+                childMap.put('Sale_Price__c', t.Sale_Price__c);
+                childMap.put('CreatedDate', t.CreatedDate.format('yyyy-MM-dd'));
+                childMap.put('LastModifiedDate', t.LastModifiedDate.format('yyyy-MM-dd'));
+
+                totalSalePrice += t.Sale_Price__c;
+
+                childrenList.add(childMap);
+            }
+
+            Map<String, Object> totalRow = new Map<String, Object>();
+            totalRow.put('Id', type + '_Total');
+            totalRow.put('Name', 'Total');
+            totalRow.put('Total_Sale_Price__c', totalSalePrice);
+            totalRow.put('isTotalRow', true);
+
+            childrenList.add(totalRow);
+
+            transgroupMap.put('_children', childrenList);
+            result.add(transgroupMap);
+        }
+
+        System.debug('Result: ' + result);
+        return result;
+    }
+}
