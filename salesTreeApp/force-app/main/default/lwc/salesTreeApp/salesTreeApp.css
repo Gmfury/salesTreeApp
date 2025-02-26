@@ -1,9 +1,0 @@
-:host {
-    --total-row-background-color: #f5f5f5; /* light gray background for total rows */
-}
-
-.lightning-tree-grid .total-row {
-    background-color: var(--total-row-background-color);
-    font-weight: bold; 
-    color: #06660a; 
-}
