@@ -1,0 +1,9 @@
+<!-- <aura:component controller="SalesTree"></aura:component>
+    <aura:attribute name="storeData" type="Object[]" />
+    <lightning:treeGrid 
+        keyField="Id" 
+        data="{!v.storeData}" 
+        columns="{!v.columns}" 
+        hideCheckboxColumn="true">
+    </lightning:treeGrid>
+</aura:component> -->
