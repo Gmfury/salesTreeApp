@@ -1,0 +1,5 @@
+.lightning-tree-grid .total-row {
+    background-color: var(--total-row-background-color);
+    font-weight: bold; 
+    color: #06660a; 
+}
